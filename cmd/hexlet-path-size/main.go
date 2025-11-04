@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "code/internal/code"
 
 func main() {
-	fmt.Printf("Hello from Hexlet!")
+	code.BuildApp()
 }
