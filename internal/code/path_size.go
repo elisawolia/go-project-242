@@ -23,8 +23,16 @@ func BuildApp() {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("%d\t%s\n", size, path)
+			human := c.Bool("human")
+			fmt.Printf("%s\t%s\n", FormatSize(size, human), path)
 			return nil
+		},
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "human",
+				Aliases: []string{"H"},
+				Usage:   "human-readable sizes (auto-select unit)",
+			},
 		},
 	}
 
@@ -60,4 +68,25 @@ func GetSize(path string) (int64, error) {
 	}
 
 	return total, nil
+}
+
+func FormatSize(size int64, human bool) string {
+	if !human {
+		return fmt.Sprintf("%dB", size)
+	}
+
+	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
+	val := float64(size)
+	i := 0
+
+	for val >= 1024 && i < len(units)-1 {
+		val /= 1024
+		i++
+	}
+
+	if i == 0 {
+		return fmt.Sprintf("%d%s", size, units[i])
+	}
+
+	return fmt.Sprintf("%.1f%s", val, units[i])
 }
