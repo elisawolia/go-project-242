@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v3"
 )
@@ -19,7 +20,8 @@ func BuildApp() {
 			}
 			path := c.Args().Get(0)
 
-			size, err := GetSize(path)
+			allFiles := c.Bool("all")
+			size, err := GetSize(path, allFiles)
 			if err != nil {
 				return err
 			}
@@ -33,6 +35,11 @@ func BuildApp() {
 				Aliases: []string{"H"},
 				Usage:   "human-readable sizes (auto-select unit)",
 			},
+			&cli.BoolFlag{
+				Name:    "all",
+				Aliases: []string{"a"},
+				Usage:   "include hidden files and directories",
+			},
 		},
 	}
 
@@ -42,7 +49,7 @@ func BuildApp() {
 	}
 }
 
-func GetSize(path string) (int64, error) {
+func GetSize(path string, allFiles bool) (int64, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
 		return 0, err
@@ -58,6 +65,12 @@ func GetSize(path string) (int64, error) {
 
 	var total int64
 	for _, entry := range entries {
+		name := entry.Name()
+
+		if !allFiles && strings.HasPrefix(name, ".") {
+			continue
+		}
+
 		if entry.Type().IsRegular() {
 			fi, err := entry.Info()
 			if err != nil {
