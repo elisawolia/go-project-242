@@ -1,4 +1,4 @@
-package service
+package go_project_242_2
 
 import (
 	"path/filepath"
@@ -10,7 +10,7 @@ import (
 func TestGetPathSize_File(t *testing.T) {
 	t.Parallel()
 
-	p := filepath.Join("..", "..", "testdata", "alpha.txt")
+	p := filepath.Join("testdata", "alpha.txt")
 
 	got, err := GetSize(p, true, false)
 	require.NoError(t, err)
@@ -27,7 +27,7 @@ func TestGetPathSize_File(t *testing.T) {
 func TestGetPathSize_Empty(t *testing.T) {
 	t.Parallel()
 
-	p := filepath.Join("..", "..", "testdata", "empty.txt")
+	p := filepath.Join("testdata", "empty.txt")
 
 	got, err := GetSize(p, false, false)
 	require.NoError(t, err)
@@ -39,7 +39,7 @@ func TestGetPathSize_Empty(t *testing.T) {
 func TestGetPathSize_Error(t *testing.T) {
 	t.Parallel()
 
-	p := filepath.Join("..", "..", "testdata", "unknown.txt")
+	p := filepath.Join("testdata", "unknown.txt")
 
 	_, err := GetSize(p, false, false)
 	require.Error(t, err)
@@ -48,7 +48,7 @@ func TestGetPathSize_Error(t *testing.T) {
 func TestGetPathSize_Directory(t *testing.T) {
 	t.Parallel()
 
-	p := filepath.Join("..", "..", "testdata", "directory")
+	p := filepath.Join("testdata", "directory")
 
 	got, err := GetSize(p, false, false)
 	require.NoError(t, err)
@@ -60,7 +60,7 @@ func TestGetPathSize_Directory(t *testing.T) {
 func TestGetPathSize_Directory_AllFiles(t *testing.T) {
 	t.Parallel()
 
-	p := filepath.Join("..", "..", "testdata", "directory")
+	p := filepath.Join("testdata", "directory")
 
 	got, err := GetSize(p, true, false)
 	require.NoError(t, err)
@@ -72,7 +72,7 @@ func TestGetPathSize_Directory_AllFiles(t *testing.T) {
 func TestGetPathSize_Directory_Recursive(t *testing.T) {
 	t.Parallel()
 
-	p := filepath.Join("..", "..", "testdata", "directory")
+	p := filepath.Join("testdata", "directory")
 
 	got, err := GetSize(p, false, true)
 	require.NoError(t, err)

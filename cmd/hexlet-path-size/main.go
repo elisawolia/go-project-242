@@ -1,7 +1,9 @@
 package main
 
-import "code/internal/service"
+import (
+	"code"
+)
 
 func main() {
-	service.BuildApp()
+	go_project_242_2.BuildApp()
 }

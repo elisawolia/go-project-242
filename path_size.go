@@ -1,4 +1,4 @@
-package service
+package go_project_242_2
 
 import (
 	"context"
