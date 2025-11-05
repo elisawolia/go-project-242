@@ -1,4 +1,4 @@
-package code
+package service
 
 import (
 	"path/filepath"

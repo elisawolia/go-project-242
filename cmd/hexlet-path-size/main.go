@@ -1,7 +1,7 @@
 package main
 
-import "code/internal/code"
+import "code/internal/service"
 
 func main() {
-	code.BuildApp()
+	service.BuildApp()
 }
