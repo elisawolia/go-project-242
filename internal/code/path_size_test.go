@@ -12,13 +12,13 @@ func TestGetPathSize_File(t *testing.T) {
 
 	p := filepath.Join("..", "..", "testdata", "alpha.txt")
 
-	got, err := GetSize(p, true)
+	got, err := GetSize(p, true, false)
 	require.NoError(t, err)
 
 	const want int64 = 3
 	require.Equalf(t, want, got, "got %v, want %v", got, want)
 
-	got, err = GetSize(p, false)
+	got, err = GetSize(p, false, false)
 	require.NoError(t, err)
 
 	require.Equalf(t, want, got, "got %v, want %v", got, want)
@@ -29,7 +29,7 @@ func TestGetPathSize_Empty(t *testing.T) {
 
 	p := filepath.Join("..", "..", "testdata", "empty.txt")
 
-	got, err := GetSize(p, false)
+	got, err := GetSize(p, false, false)
 	require.NoError(t, err)
 
 	const want int64 = 0
@@ -41,7 +41,7 @@ func TestGetPathSize_Error(t *testing.T) {
 
 	p := filepath.Join("..", "..", "testdata", "unknown.txt")
 
-	_, err := GetSize(p, false)
+	_, err := GetSize(p, false, false)
 	require.Error(t, err)
 }
 
@@ -50,7 +50,7 @@ func TestGetPathSize_Directory(t *testing.T) {
 
 	p := filepath.Join("..", "..", "testdata", "directory")
 
-	got, err := GetSize(p, false)
+	got, err := GetSize(p, false, false)
 	require.NoError(t, err)
 
 	const want int64 = 6
@@ -62,10 +62,22 @@ func TestGetPathSize_Directory_AllFiles(t *testing.T) {
 
 	p := filepath.Join("..", "..", "testdata", "directory")
 
-	got, err := GetSize(p, true)
+	got, err := GetSize(p, true, false)
 	require.NoError(t, err)
 
 	const want int64 = 16
+	require.Equalf(t, want, got, "got %v, want %v", got, want)
+}
+
+func TestGetPathSize_Directory_Recursive(t *testing.T) {
+	t.Parallel()
+
+	p := filepath.Join("..", "..", "testdata", "directory")
+
+	got, err := GetSize(p, false, true)
+	require.NoError(t, err)
+
+	const want int64 = 12
 	require.Equalf(t, want, got, "got %v, want %v", got, want)
 }
 

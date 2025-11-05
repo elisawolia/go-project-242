@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli/v3"
@@ -12,7 +13,7 @@ import (
 func BuildApp() {
 	cmd := cli.Command{
 		Name:      "hexlet-path-size",
-		Usage:     "print size of a file or directory;",
+		Usage:     "hexlet-path-size - print size of a file or directory; supports -r (recursive), -H (human-readable), -a (include hidden)",
 		UsageText: "hexlet-path-size [global options]",
 		Action: func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() == 0 {
@@ -21,7 +22,8 @@ func BuildApp() {
 			path := c.Args().Get(0)
 
 			allFiles := c.Bool("all")
-			size, err := GetSize(path, allFiles)
+			recursive := c.Bool("recursive")
+			size, err := GetSize(path, allFiles, recursive)
 			if err != nil {
 				return err
 			}
@@ -31,14 +33,22 @@ func BuildApp() {
 		},
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:    "human",
-				Aliases: []string{"H"},
-				Usage:   "human-readable sizes (auto-select unit)",
+				Name:        "human",
+				Aliases:     []string{"H"},
+				DefaultText: "false",
+				Usage:       "human-readable sizes (auto-select unit)",
 			},
 			&cli.BoolFlag{
-				Name:    "all",
-				Aliases: []string{"a"},
-				Usage:   "include hidden files and directories",
+				Name:        "all",
+				Aliases:     []string{"a"},
+				DefaultText: "false",
+				Usage:       "include hidden files and directories",
+			},
+			&cli.BoolFlag{
+				Name:        "recursive",
+				Aliases:     []string{"r"},
+				DefaultText: "false",
+				Usage:       "recursive size of directories",
 			},
 		},
 	}
@@ -49,7 +59,7 @@ func BuildApp() {
 	}
 }
 
-func GetSize(path string, allFiles bool) (int64, error) {
+func GetSize(path string, allFiles bool, recursive bool) (int64, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
 		return 0, err
@@ -58,12 +68,17 @@ func GetSize(path string, allFiles bool) (int64, error) {
 		return info.Size(), nil
 	}
 
-	entries, err := os.ReadDir(path)
+	return dirSize(path, allFiles, recursive)
+}
+
+func dirSize(dir string, allFiles bool, recursive bool) (int64, error) {
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return 0, err
 	}
 
 	var total int64
+
 	for _, entry := range entries {
 		name := entry.Name()
 
@@ -71,12 +86,26 @@ func GetSize(path string, allFiles bool) (int64, error) {
 			continue
 		}
 
+		fullPath := filepath.Join(dir, name)
+
 		if entry.Type().IsRegular() {
 			fi, err := entry.Info()
 			if err != nil {
 				return 0, err
 			}
 			total += fi.Size()
+			continue
+		}
+
+		if entry.IsDir() {
+			if recursive {
+				subTotal, err := dirSize(fullPath, allFiles, recursive)
+				if err != nil {
+					return 0, err
+				}
+				total += subTotal
+			}
+			continue
 		}
 	}
 
