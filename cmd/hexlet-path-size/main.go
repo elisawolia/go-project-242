@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	go_project_242_2.BuildApp()
+	code.BuildApp()
 }

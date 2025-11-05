@@ -1,4 +1,4 @@
-package go_project_242_2
+package code
 
 import (
 	"path/filepath"
