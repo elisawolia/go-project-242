@@ -23,7 +23,7 @@ func BuildApp() {
 
 			allFiles := c.Bool("all")
 			recursive := c.Bool("recursive")
-			size, err := GetSize(path, allFiles, recursive)
+			size, err := GetPathSize(path, allFiles, recursive)
 			if err != nil {
 				return err
 			}
@@ -59,7 +59,7 @@ func BuildApp() {
 	}
 }
 
-func GetSize(path string, allFiles bool, recursive bool) (int64, error) {
+func GetPathSize(path string, allFiles bool, recursive bool) (int64, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
 		return 0, err
