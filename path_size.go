@@ -13,7 +13,7 @@ func GetPathSize(path string, recursive, human, all bool) (string, error) {
 		return "", err
 	}
 
-	return FormatSize(size, human) + "\t" + path, nil
+	return FormatSize(size, human), nil
 }
 
 func GetSize(path string, allFiles bool, recursive bool) (int64, error) {

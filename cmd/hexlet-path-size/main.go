@@ -28,7 +28,7 @@ func main() {
 			if err != nil {
 				return err
 			}
-			fmt.Println(pathSize)
+			fmt.Printf("%s\t%s\n", pathSize, path)
 			return nil
 		},
 		Flags: []cli.Flag{
