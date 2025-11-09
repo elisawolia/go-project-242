@@ -53,8 +53,8 @@ func main() {
 		},
 	}
 
-	err := cmd.Run(context.Background(), os.Args)
-	if err != nil {
-		return
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }

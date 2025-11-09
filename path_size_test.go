@@ -1,6 +1,7 @@
 package code
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -123,4 +124,44 @@ func TestFormatSize_Human(t *testing.T) {
 			require.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestGetSize_SymlinkToFile(t *testing.T) {
+	t.Parallel()
+
+	target, err := filepath.Abs(filepath.Join("testdata", "alpha.txt"))
+	require.NoError(t, err)
+
+	tmp := t.TempDir()
+	link := filepath.Join(tmp, "alpha-link.txt")
+
+	if err := os.Symlink(target, link); err != nil {
+		t.Skipf("cannot create symlink: %v", err)
+	}
+
+	got, err := GetSize(link, false, false)
+	require.NoError(t, err)
+
+	const want int64 = 3
+	require.Equalf(t, want, got, "got %v, want %v", got, want)
+}
+
+func TestGetSize_SymlinkToDirectory(t *testing.T) {
+	t.Parallel()
+
+	target, err := filepath.Abs(filepath.Join("testdata", "directory"))
+	require.NoError(t, err)
+
+	tmp := t.TempDir()
+	link := filepath.Join(tmp, "directory-link")
+
+	if err := os.Symlink(target, link); err != nil {
+		t.Skipf("cannot create symlink: %v", err)
+	}
+
+	got, err := GetSize(link, false, true)
+	require.NoError(t, err)
+
+	const want int64 = 12
+	require.Equalf(t, want, got, "got %v, want %v", got, want)
 }
