@@ -8,15 +8,15 @@ import (
 )
 
 func GetPathSize(path string, recursive, human, all bool) (string, error) {
-	size, err := GetSize(path, all, recursive)
+	size, err := getSize(path, all, recursive)
 	if err != nil {
 		return "", err
 	}
 
-	return FormatSize(size, human), nil
+	return formatSize(size, human), nil
 }
 
-func GetSize(path string, allFiles bool, recursive bool) (int64, error) {
+func getSize(path string, allFiles bool, recursive bool) (int64, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
 		return 0, err
@@ -27,7 +27,7 @@ func GetSize(path string, allFiles bool, recursive bool) (int64, error) {
 		if err != nil {
 			return 0, err
 		}
-		return GetSize(target, allFiles, recursive)
+		return getSize(target, allFiles, recursive)
 	}
 
 	if !info.IsDir() {
@@ -44,55 +44,54 @@ func dirSize(dir string, allFiles bool, recursive bool) (int64, error) {
 	}
 
 	var total int64
-
 	for _, entry := range entries {
-		name := entry.Name()
-
-		if !allFiles && strings.HasPrefix(name, ".") {
-			continue
-		}
-
-		fullPath := filepath.Join(dir, name)
-
-		fi, err := entry.Info()
+		size, err := entrySize(dir, entry, allFiles, recursive)
 		if err != nil {
 			return 0, err
 		}
-
-		if fi.Mode()&os.ModeSymlink != 0 {
-			target, err := filepath.EvalSymlinks(fullPath)
-			if err != nil {
-				return 0, err
-			}
-			sz, err := GetSize(target, allFiles, recursive)
-			if err != nil {
-				return 0, err
-			}
-			total += sz
-			continue
-		}
-
-		if fi.Mode().IsRegular() {
-			total += fi.Size()
-			continue
-		}
-
-		if fi.IsDir() {
-			if recursive {
-				subTotal, err := dirSize(fullPath, allFiles, recursive)
-				if err != nil {
-					return 0, err
-				}
-				total += subTotal
-			}
-			continue
-		}
+		total += size
 	}
 
 	return total, nil
 }
 
-func FormatSize(size int64, human bool) string {
+func entrySize(parent string, entry os.DirEntry, allFiles bool, recursive bool) (int64, error) {
+	name := entry.Name()
+
+	if !allFiles && strings.HasPrefix(name, ".") {
+		return 0, nil
+	}
+
+	fullPath := filepath.Join(parent, name)
+
+	info, err := entry.Info()
+	if err != nil {
+		return 0, err
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		return symlinkSize(fullPath, allFiles, recursive)
+	}
+	if info.Mode().IsRegular() {
+		return info.Size(), nil
+	}
+	if info.IsDir() {
+		if !recursive {
+			return 0, nil
+		}
+		return dirSize(fullPath, allFiles, recursive)
+	}
+	return 0, nil
+}
+
+func symlinkSize(path string, allFiles bool, recursive bool) (int64, error) {
+	target, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		return 0, err
+	}
+	return getSize(target, allFiles, recursive)
+}
+
+func formatSize(size int64, human bool) string {
 	if !human {
 		return fmt.Sprintf("%dB", size)
 	}
